@@ -3,3 +3,4 @@ auth_state.json
 screenshots/
 __pycache__/
 *.pyc
+.streamlit/secrets.toml
