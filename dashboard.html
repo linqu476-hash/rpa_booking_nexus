@@ -1,0 +1,110 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Booking RPA Control</title>
+<style>
+:root{--bg:#e8edeb;--ink:#10232c;--mut:#5b6f77;--pan:#fff;--line:#cfd9d6;--rail:#0f3d4a;--rail2:#a9c7cd;--go:#d9480f;--ok:#2f855a;--bad:#b42318;--log:#0b1a20;
+--f:Bahnschrift,"Segoe UI",system-ui,sans-serif;--m:Consolas,"Cascadia Mono",monospace}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1a1f;--ink:#e3ecee;--mut:#8fa6ad;--pan:#14262d;--line:#27414a;--rail:#091418;--log:#060f13}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--f)}
+button,input{font:inherit}:focus-visible{outline:3px solid var(--go);outline-offset:2px}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav{background:var(--rail);color:#fff;padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+nav h1{font-size:18px;margin:0 8px 2px;font-weight:600}nav p{margin:0 8px 18px;color:var(--rail2);font-size:13px}
+nav h3{margin:16px 8px 6px;font-size:13px;font-weight:500;color:var(--rail2)}
+.t{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:#fff;padding:9px 10px;border-radius:6px;cursor:pointer}
+.t:hover{background:#ffffff14}.t[aria-current=true]{background:#fff;color:var(--rail)}
+.t i{font-style:normal;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;font-size:12px;flex:none}
+.t em{margin-left:auto;font-style:normal;font-size:11px;color:#ffb199}
+.sw{display:flex;align-items:center;gap:8px;margin:8px;font-size:13px;color:var(--rail2)}
+main{padding:22px 28px;display:grid;gap:18px;align-content:start;max-width:1100px;width:100%}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:8px;padding:18px 20px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+h2{margin:0 0 4px;font-size:22px;font-weight:600}.d{color:var(--mut);margin:0;max-width:70ch}
+.chip{padding:3px 12px;border-radius:99px;font-size:13px;border:1px solid var(--line);white-space:nowrap}
+.chip.running{background:#fde8dc;color:var(--go);border-color:var(--go)}.chip.done{color:var(--ok);border-color:var(--ok)}.chip.failed{color:var(--bad);border-color:var(--bad)}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}
+label{display:grid;gap:4px;font-size:13px;color:var(--mut)}label.c{display:flex;align-items:center;gap:8px;color:var(--ink);align-self:end}
+input[type=text]{padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.b{padding:10px 20px;border-radius:6px;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer}
+.b.go{background:var(--go);border-color:var(--go);color:#fff;font-weight:600}.b:disabled{opacity:.45;cursor:not-allowed}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.log{background:var(--log);color:#cfe3e8;border-radius:8px;padding:14px 16px;font:13px/1.5 var(--m);height:340px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.log .e{color:#ff8f7e}.log .w{color:#f2c96b}.log .o{color:#7fd6a0}.log .h{color:#fff;font-weight:700}.log .cmd{color:#8fa6ad}
+.in{display:flex;gap:8px;margin-top:10px}.in input{flex:1;font-family:var(--m)}.in.wait input{border-color:var(--go)}
+.two{display:grid;grid-template-columns:1fr 1.3fr;gap:18px}@media(max-width:1000px){.app{grid-template-columns:1fr}nav{position:static;height:auto}.two{grid-template-columns:1fr}}
+h4{margin:0 0 10px;font-size:15px}.run{display:flex;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 2px;cursor:pointer;color:inherit}
+.run small{color:var(--mut);margin-left:auto}.dot{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--mut);flex:none}
+.dot.done{background:var(--ok)}.dot.failed{background:var(--bad)}.dot.running{background:var(--go)}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.shots button{padding:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:none;cursor:pointer;text-align:left;color:var(--mut);font-size:11px}
+.shots img{width:100%;height:80px;object-fit:cover;object-position:top;display:block}.shots span{display:block;padding:3px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog{border:0;border-radius:8px;padding:0;max-width:92vw;background:var(--pan);color:var(--ink)}dialog img{max-width:90vw;max-height:84vh;display:block}dialog::backdrop{background:#000a}
+.empty{color:var(--mut);margin:0}
+.tb{width:100%;border-collapse:collapse;font-size:13px}.tb th,.tb td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}.tb tr[data-r]:not([data-r=""]){cursor:pointer}
+.st-running{color:var(--go)}.st-done{color:var(--ok)}.st-failed{color:var(--bad)}.st-skipped,.st-waiting,.st-ready{color:var(--mut)}.st-invalid{color:var(--bad)}
+</style></head><body><div class="app">
+<nav><h1>Booking RPA</h1><p>Infor Nexus automation</p><div id="tasks"></div>
+<h3>Run settings</h3>
+<label class="sw"><input type="checkbox" id="hl"> Run without showing the browser</label>
+<label class="sw"><input type="checkbox" id="keep"> Keep the browser open at the end</label></nav>
+<main>
+<section class="card"><h2>Run from Excel</h2><p class="d">One Excel format for every job. Each row is one job: <b>booking</b> (login through Edit Items) or <b>cancel</b> (cancel the New bookings of a PO). If <i>action</i> is empty, a row with plan_ref is a booking and a row with only po is a cancel.</p>
+<div class="bar" style="margin:14px 0"><button class="b" id="tpl">Download Excel template</button><label class="b" style="cursor:pointer">Upload Excel file<input type="file" id="xl" accept=".xlsx" hidden></label><label class="c"><input type="checkbox" id="sof" checked> Stop on first failure</label><label class="c"><input type="checkbox" id="dry" checked> Cancel rows: dry run only</label><button class="b go" id="brun" disabled>Run all rows</button><button class="b" id="bstop" disabled>Stop</button><span class="d" id="bmsg"></span></div><div id="bt"></div></section>
+<section class="card"><div class="top"><div><h2 id="tt"></h2><p class="d" id="td"></p></div><span class="chip" id="chip">Idle</span></div>
+<form id="f"></form><div class="bar"><button class="b go" id="run">Run task</button><button class="b" id="stop" disabled>Stop</button><span class="d" id="msg"></span></div></section>
+<section class="card"><h4 id="lt">Live log</h4><div class="log" id="log" aria-live="polite">Pick a task and press Run task.</div>
+<div class="in" id="inw"><input type="text" id="inp" placeholder="Type a reply for the running task (for example YES), then Send"><button class="b" id="snd">Send</button></div></section>
+<div class="two"><section class="card"><h4>Recent runs</h4><div id="runs"><p class="empty">No runs yet.</p></div></section>
+<section class="card"><h4>Latest screenshots</h4><div class="shots" id="shots"><p class="empty">None yet.</p></div></section></div>
+</main></div><dialog id="dlg"><img id="big" alt="Screenshot"></dialog>
+<script>
+const $=id=>document.getElementById(id);let TASKS=[],cur=null,runId=null,seen=0,timer=null;
+const api=(u,b)=>fetch(u,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{}).then(r=>r.json());
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const cls=l=>/error|traceback|exception|failed|did not|not found/i.test(l)?'e':/warning|skipped|cannot/i.test(l)?'w':/^===|^-----|SUMMARY/.test(l)?'h':/clicked|opened|selected|filled|canceled|done|success|found/i.test(l)?'o':'';
+$('hl').checked=localStorage.hl==='1';$('keep').checked=localStorage.keep==='1';
+$('hl').onchange=e=>localStorage.hl=e.target.checked?1:0;$('keep').onchange=e=>localStorage.keep=e.target.checked?1:0;
+function nav(){let g='',h='';TASKS.forEach(t=>{if(t.group!==g){g=t.group;h+=`<h3>${g}</h3>`}
+h+=`<button class="t" data-id="${t.id}" aria-current="${cur&&cur.id===t.id}"><i>${t.step||'•'}</i>${t.title}${t.danger?'<em>cancels</em>':''}</button>`});
+$('tasks').innerHTML=h;document.querySelectorAll('.t').forEach(b=>b.onclick=()=>pick(b.dataset.id))}
+function pick(id){cur=TASKS.find(t=>t.id===id);nav();$('tt').textContent=cur.title;$('td').textContent=cur.desc;$('msg').textContent='';
+$('f').innerHTML=cur.params.filter(p=>!p.hidden).map(p=>p.kind==='flag'?
+`<label class="c"><input type="checkbox" name="${p.name}" ${p.default?'checked':''}> ${p.label}</label>`:
+`<label>${p.label}${p.required?' *':''}<input type="text" name="${p.name}" value="${esc(p.default||'')}" placeholder="${esc(p.ph||'')}" autocomplete="off"></label>`).join('')||'<p class="empty">This task needs no input.</p>'}
+function vals(){const v={};cur.params.forEach(p=>{const e=document.querySelector(`[name="${p.name}"]`);if(e)v[p.name]=p.kind==='flag'?e.checked:e.value});return v}
+function prep(){const v=vals();$('msg').textContent='';if(cur.danger){if(v.dry_run){v.yes=false}else{if(!confirm('This will CANCEL real bookings and cannot be undone. Continue?'))return null;v.yes=true}}return v}
+$('run').onclick=async()=>{const v=prep();if(!v)return;
+const r=await api('/api/run',{task:cur.id,values:v,headless:$('hl').checked,auto_close:!$('keep').checked});
+if(r.error){$('msg').textContent=r.error;return}follow(r.id)};
+function follow(id){runId=id;seen=0;$('log').innerHTML='';clearInterval(timer);poll();timer=setInterval(poll,900)}
+async function poll(){const r=await api(`/api/run/${runId}?since=${seen}`);if(r.error)return;
+const box=$('log'),end=box.scrollHeight-box.scrollTop-box.clientHeight<40;
+if(!seen)box.innerHTML=`<div class="cmd">$ ${esc(r.cmd)}</div>`;
+r.lines.forEach(l=>box.insertAdjacentHTML('beforeend',`<div class="${cls(l)}">${esc(l)||'&nbsp;'}</div>`));seen=r.total;if(end)box.scrollTop=box.scrollHeight;
+$('lt').textContent='Live log: '+r.title;const c=$('chip');c.className='chip '+r.status;c.textContent={running:'Running',done:'Finished',failed:'Failed (code '+r.code+')'}[r.status];
+$('stop').disabled=r.status!=='running';$('run').disabled=r.status==='running';$('inw').className='in'+(r.awaiting?' wait':'');
+if(r.status!=='running'){clearInterval(timer);loadRuns();loadShots()}}
+$('stop').onclick=()=>api('/api/stop/'+runId,{});
+$('snd').onclick=()=>{api('/api/input/'+runId,{text:$('inp').value});$('inp').value=''};$('inp').onkeydown=e=>{if(e.key==='Enter')$('snd').click()};
+async function loadRuns(){const r=await api('/api/runs');if(!r.length)return;
+$('runs').innerHTML=r.map(x=>`<button class="run" data-id="${x.id}"><span class="dot ${x.status}"></span>${x.title}<small>${new Date(x.started*1000).toLocaleTimeString()}</small></button>`).join('');
+document.querySelectorAll('.run').forEach(b=>b.onclick=()=>{follow(b.dataset.id)})}
+async function loadShots(){const r=await api('/api/shots');if(!r.length)return;
+$('shots').innerHTML=r.map(s=>`<button data-n="${s.name}"><img loading="lazy" src="/shots/${s.name}?t=${s.time}" alt=""><span>${s.name}</span></button>`).join('');
+document.querySelectorAll('.shots button').forEach(b=>b.onclick=()=>{$('big').src='/shots/'+b.dataset.n+'?t='+Date.now();$('dlg').showModal()})}
+$('dlg').onclick=()=>$('dlg').close();
+let rowsData=[],bstate=null,btimer=null;const COLS=['plan_ref','comment','date','po','status'];
+function drawBatch(){const rows=bstate?bstate.rows:rowsData.map(r=>({...r,state:r.error?'invalid':'ready'}));
+$('bt').innerHTML='<table class="tb"><tr><th>#</th><th>action</th>'+COLS.map(c=>`<th>${c}</th>`).join('')+'<th>Result</th></tr>'+rows.map((r,i)=>`<tr data-r="${r.run_id||''}"><td>${i+1}</td><td>${r.task==='cancel'?'cancel':'booking'}</td>${COLS.map(c=>`<td>${esc(String(r.vals[c]??''))}</td>`).join('')}<td class="st-${r.state}">${r.state}${r.error?': '+esc(r.error):''}</td></tr>`).join('')+'</table>';
+document.querySelectorAll('#bt tr[data-r]').forEach(tr=>tr.onclick=()=>tr.dataset.r&&follow(tr.dataset.r))}
+$('tpl').onclick=()=>location.href='/api/template';
+$('xl').onchange=async e=>{const f=e.target.files[0];if(!f)return;const r=await fetch('/api/upload',{method:'POST',body:await f.arrayBuffer()}).then(r=>r.json());
+if(r.error){$('bmsg').textContent=r.error;return}rowsData=r.rows;bstate=null;drawBatch();const bad=r.rows.filter(x=>x.error).length;
+$('brun').disabled=bad>0;$('bmsg').textContent=r.rows.length+' rows loaded'+(bad?' - fix the '+bad+' red row(s) and upload again':'')+(r.ignored.length?' (ignored columns: '+r.ignored.join(', ')+')':'')};
+$('brun').onclick=async()=>{const dry=$('dry').checked;if(rowsData.some(r=>r.task==='cancel')&&!dry&&!confirm('Cancel rows will CANCEL real bookings and cannot be undone. Continue?'))return;
+const r=await api('/api/batch',{rows:rowsData,dry_run:dry,headless:$('hl').checked,auto_close:!$('keep').checked,stop_on_fail:$('sof').checked});
+if(r.error){$('bmsg').textContent=r.error;return}clearInterval(btimer);btimer=setInterval(pollBatch,1000);pollBatch()};
+$('bstop').onclick=()=>api('/api/batch/stop',{});
+async function pollBatch(){const b=await api('/api/batch');if(!b.rows||!b.rows.length)return;bstate=b;drawBatch();const on=b.state==='running';
+if(on&&b.current&&b.current!==runId)follow(b.current);$('brun').disabled=on;$('bstop').disabled=!on;$('bmsg').textContent=on?'Batch running...':'Batch '+b.state;if(!on)clearInterval(btimer)}
+(async()=>{TASKS=await api('/api/tasks');pick(TASKS[0].id);loadRuns();loadShots();
+const rs=await api('/api/runs');const live=rs.find(x=>x.status==='running');if(live)follow(live.id)})();
+</script></body></html>
